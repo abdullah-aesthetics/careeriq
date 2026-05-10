@@ -1,0 +1,12 @@
+submission_id,timestamp,math,english,science,cs,business,arts,interests,personality,goals,recommended_career,career_title,confidence_%,avg_salary,growth,feedback
+3,2026-04-26 13:34:19,14,100,78,74,0,67,cybersecurity,extrovert,"stability, salary",business,Business & Entrepreneurship,100.0,"$70,000 – $200,000+",High (steady demand across all industries),positive
+4,2026-04-26 13:57:54,61,48,42,55,65,68,writing,creative,impact,uiux,UI/UX Design,100.0,"$75,000 – $140,000",High (13% by 2030),positive
+5,2026-04-27 10:16:59,75,64,65,66,59,50,"gaming, coding",creative,"salary, learning, creative_freedom",medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),positive
+6,2026-04-30 10:32:23,75,70,65,60,55,50,finance,extrovert,learning,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),
+7,2026-04-30 10:32:32,75,70,65,60,55,50,finance,extrovert,learning,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),
+8,2026-04-30 14:10:34,48,70,35,60,55,50,art,extrovert,remote,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),
+9,2026-04-30 14:17:22,48,70,35,60,55,50,art,extrovert,remote,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),
+10,2026-04-30 14:24:16,75,70,65,60,55,50,science,extrovert,remote,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),positive
+11,2026-04-30 14:31:41,75,70,65,60,55,50,science,introvert,remote,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),positive
+12,2026-04-30 14:41:46,75,70,65,60,55,50,,introvert,remote,medicine,Medicine & Healthcare,100.0,"$100,000 – $350,000",Very High (13% by 2031),positive
+13,2026-04-30 15:06:07,59,3,65,76,55,69,"gaming, social",introvert,salary,business,Business & Entrepreneurship,100.0,"$70,000 – $200,000+",High (steady demand across all industries),positive

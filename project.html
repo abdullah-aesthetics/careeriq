@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerIQ — Smart Career Recommendation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a26;--bg4:#22223a;
+  --card:#16161f;--card2:#1e1e2e;
+  --accent:#7c6aff;--accent2:#a78bfa;--accent3:#c4b5fd;
+  --gold:#f59e0b;--teal:#14b8a6;--rose:#f43f5e;--sky:#38bdf8;
+  --text:#f8f8ff;--text2:#a9a9c8;--text3:#6b6b88;
+  --border:rgba(124,106,255,0.15);--border2:rgba(124,106,255,0.3);
+  --glow:rgba(124,106,255,0.4);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(124,106,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,106,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.bg-orb1{position:fixed;top:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(124,106,255,0.12) 0%,transparent 70%);pointer-events:none;z-index:0}
+.bg-orb2{position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(20,184,166,0.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.logo span{color:var(--accent2)}
+.nav-badge{background:rgba(124,106,255,0.1);border:1px solid var(--border2);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--accent3)}
+.api-status{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid;display:flex;align-items:center;gap:6px}
+.api-status.ok{border-color:rgba(20,184,166,0.4);color:var(--teal);background:rgba(20,184,166,0.08)}
+.api-status.err{border-color:rgba(244,63,94,0.4);color:var(--rose);background:rgba(244,63,94,0.08)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* HERO */
+.hero{text-align:center;padding:80px 0 60px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(124,106,255,0.1);border:1px solid var(--border2);border-radius:30px;padding:8px 20px;font-size:13px;color:var(--accent3);margin-bottom:32px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(36px,5.5vw,68px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:20px}
+.gradient-text{background:linear-gradient(135deg,#a78bfa,#38bdf8,#a78bfa);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradshift 4s ease infinite}
+@keyframes gradshift{0%{background-position:0%}100%{background-position:200%}}
+.hero p{font-size:18px;color:var(--text2);max-width:580px;margin:0 auto 40px;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:48px;padding:28px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-top:40px}
+.stat-item{text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:700;color:var(--accent2)}
+.stat-label{font-size:13px;color:var(--text3);margin-top:4px}
+
+/* PROGRESS */
+.progress-wrap{margin:32px 0 24px}
+.progress-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-label{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--accent3)}
+.progress-pct{font-size:13px;color:var(--text3)}
+.progress-bar-bg{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--teal));transition:width 0.8s cubic-bezier(0.4,0,0.2,1)}
+
+/* SECTION CARD */
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:24px;position:relative;overflow:hidden}
+.section-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent2),transparent);opacity:0.5}
+.section-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.s-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:rgba(124,106,255,0.15)}
+.section-sub{color:var(--text2);font-size:14px;margin-bottom:28px}
+
+/* SLIDERS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.score-bar{display:flex;flex-direction:column;gap:8px}
+.score-bar label{display:flex;justify-content:space-between;font-size:13px;color:var(--text2)}
+.score-bar label .val{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--accent2)}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg3);outline:none;cursor:pointer;margin:4px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent2);box-shadow:0 0 10px rgba(167,139,250,0.5);transition:transform 0.2s;cursor:pointer}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
+.track-bg{width:100%;height:4px;border-radius:2px;background:var(--bg3);position:relative}
+.track-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.3s}
+
+/* CHIPS */
+.chip-group{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:10px 16px;border-radius:50px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;transition:all 0.2s;user-select:none}
+.chip:hover{border-color:var(--border2);color:var(--text)}
+.chip.selected{background:rgba(124,106,255,0.2);border-color:var(--accent2);color:var(--accent3);font-weight:500}
+
+/* PERSONALITY */
+.personality-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.p-card{padding:18px;border-radius:16px;border:2px solid var(--border);background:var(--bg3);cursor:pointer;transition:all 0.3s}
+.p-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.p-card.selected{border-color:var(--accent2);background:rgba(124,106,255,0.12);box-shadow:0 0 28px rgba(124,106,255,0.2)}
+.p-icon{font-size:28px;margin-bottom:10px}
+.p-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:5px}
+.p-desc{font-size:12px;color:var(--text3);line-height:1.6}
+
+/* GOALS */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.goal-card{padding:16px;border-radius:14px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:all 0.3s;text-align:center}
+.goal-card:hover{border-color:var(--border2)}
+.goal-card.selected{border-color:var(--teal);background:rgba(20,184,166,0.1);box-shadow:0 0 18px rgba(20,184,166,0.15)}
+.goal-card .g-icon{font-size:26px;margin-bottom:6px}
+.goal-card .g-label{font-size:13px;font-weight:500;color:var(--text2)}
+.goal-card.selected .g-label{color:var(--teal)}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:17px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;font-family:'Syne',sans-serif;font-size:17px;font-weight:700;cursor:pointer;transition:all 0.3s;margin-top:10px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 50px rgba(124,106,255,0.5)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-back{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;transition:all 0.3s}
+.btn-back:hover{border-color:var(--accent2);color:var(--accent3)}
+.btn-row{display:flex;gap:12px;margin-top:24px}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(10,10,15,0.92);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;backdrop-filter:blur(8px)}
+.spinner{width:56px;height:56px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent2);animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:'Syne',sans-serif;font-size:18px;color:var(--accent3)}
+.loading-sub{font-size:14px;color:var(--text3)}
+.hidden{display:none!important}
+
+/* ERROR TOAST */
+.toast{position:fixed;top:24px;right:24px;background:#1e1e2e;border:1px solid rgba(244,63,94,0.4);border-radius:14px;padding:16px 20px;z-index:9999;max-width:360px;animation:slideIn 0.3s ease}
+.toast-title{font-weight:600;color:var(--rose);margin-bottom:4px;font-size:14px}
+.toast-msg{font-size:13px;color:var(--text2)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* RESULTS */
+.result-hero{text-align:center;padding:48px 0 32px}
+.result-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.35);border-radius:30px;padding:9px 22px;font-size:14px;color:var(--teal);margin-bottom:24px}
+.career-title-big{font-family:'Syne',sans-serif;font-size:clamp(30px,5vw,54px);font-weight:800;letter-spacing:-1px;margin-bottom:14px;background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.career-desc{font-size:17px;color:var(--text2);max-width:580px;margin:0 auto 14px;line-height:1.7}
+.match-pill{display:inline-flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:50px;padding:10px 24px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--accent2);margin-top:10px}
+
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:28px 0}
+.r-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;transition:all 0.3s}
+.r-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.r-card-header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.r-card-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.ri-purple{background:rgba(124,106,255,0.15)}
+.ri-teal{background:rgba(20,184,166,0.15)}
+.ri-gold{background:rgba(245,158,11,0.15)}
+.ri-sky{background:rgba(56,189,248,0.15)}
+.r-card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+
+.skill-tags{display:flex;flex-wrap:wrap;gap:8px}
+.skill-tag{padding:7px 13px;border-radius:8px;font-size:13px;font-weight:500}
+.st-purple{background:rgba(124,106,255,0.15);color:var(--accent3);border:1px solid rgba(124,106,255,0.25)}
+.st-teal{background:rgba(20,184,166,0.1);color:var(--teal);border:1px solid rgba(20,184,166,0.2)}
+.st-gold{background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2)}
+
+.course-list{display:flex;flex-direction:column;gap:10px}
+.course-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--bg3);border-radius:11px;border:1px solid var(--border)}
+.c-num{width:26px;height:26px;border-radius:7px;background:rgba(124,106,255,0.2);color:var(--accent3);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.c-name{font-size:13px;font-weight:500}
+.c-platform{font-size:12px;color:var(--text3)}
+
+.roadmap{display:flex;flex-direction:column}
+.rm-item{display:flex;gap:14px;padding:14px 0}
+.rm-left{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.rm-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.rm-dot.active{background:var(--accent2);box-shadow:0 0 10px rgba(167,139,250,0.5);animation:pulse 2s infinite}
+.rm-dot.future{background:var(--bg4);border:2px solid var(--border)}
+.rm-line{flex:1;width:2px;background:var(--border);min-height:24px}
+.rm-phase{font-size:11px;color:var(--text3);margin-bottom:3px;letter-spacing:0.4px;text-transform:uppercase}
+.rm-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:3px}
+.rm-desc{font-size:12px;color:var(--text3)}
+
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px}
+.chart-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:18px}
+
+.tree-viz{font-size:13px}
+.tree-node{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:50px;font-size:12px;font-weight:500;margin:3px}
+.tn-root{background:rgba(124,106,255,0.2);border:1px solid var(--accent2);color:var(--accent3)}
+.tn-branch{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:var(--sky)}
+.tn-leaf{background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.3);color:var(--teal)}
+.tree-level{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0}
+.tree-arrow{text-align:center;color:var(--text3);font-size:18px;margin:2px 0}
+.tree-rules{margin-top:12px;padding:12px;background:rgba(124,106,255,0.06);border-radius:10px}
+.tree-rule{font-size:12px;color:var(--text2);line-height:1.9}
+.tree-rule .leaf{color:var(--teal);font-weight:600}
+
+.alt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.alt-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all 0.3s}
+.alt-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.alt-icon{font-size:26px;margin-bottom:10px}
+.alt-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:5px}
+.alt-match{font-size:12px;color:var(--teal);margin-top:6px}
+
+.feedback-section{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;margin:18px 0}
+.feedback-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.feedback-sub{font-size:14px;color:var(--text2);margin-bottom:20px}
+.fb-btns{display:flex;justify-content:center;gap:14px}
+.fb-btn{padding:12px 32px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:14px;cursor:pointer;transition:all 0.3s}
+.fb-btn.yes:hover{background:rgba(20,184,166,0.2);border-color:var(--teal);color:var(--teal)}
+.fb-btn.no:hover{background:rgba(244,63,94,0.12);border-color:var(--rose);color:var(--rose)}
+.fb-thanks{margin-top:16px;color:var(--teal);font-size:14px}
+
+.salary-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:50px;padding:7px 18px;font-size:13px;color:var(--gold);margin:4px}
+.growth-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);border-radius:50px;padding:7px 18px;font-size:13px;color:var(--teal);margin:4px}
+.badges-row{margin:16px 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+
+.restart-wrap{text-align:center;padding-bottom:48px}
+.btn-restart{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;transition:all 0.3s}
+.btn-restart:hover{border-color:var(--accent2);color:var(--accent3)}
+
+.fade-in{animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb1"></div>
+<div class="bg-orb2"></div>
+
+<!-- LOADING -->
+<div id="loading" class="loading-overlay hidden">
+  <div class="spinner"></div>
+  <div class="loading-title">Analysing your profile...</div>
+  <div class="loading-sub">Decision Tree is processing 500+ career paths</div>
+</div>
+
+<div class="main">
+  <nav>
+    <div class="logo">Career<span>IQ</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="api-status" class="api-status ok"><span class="status-dot"></span><span id="api-status-text">Checking API...</span></div>
+      <div class="nav-badge">🧠 Decision Tree AI</div>
+    </div>
+  </nav>
+
+  <!-- ═══ PAGE: HOME ═══ -->
+  <div id="page-home" class="hero fade-in">
+    <div class="hero-tag">🌳 Powered by scikit-learn Decision Tree</div>
+    <h1>Find Your <span class="gradient-text">Perfect Career</span> Path</h1>
+    <p>Answer 4 quick questions about your marks, interests, and personality. Our AI decision tree recommends the best career path — like a real counsellor.</p>
+    <button class="btn-primary" style="width:auto;padding:15px 44px;font-size:16px;border-radius:50px" onclick="showPage('form')">Start My Analysis →</button>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">6</div><div class="stat-label">Career Paths</div></div>
+      <div class="stat-item"><div class="stat-num">27</div><div class="stat-label">Input Features</div></div>
+      <div class="stat-item"><div class="stat-num">50+</div><div class="stat-label">Training Records</div></div>
+      <div class="stat-item"><div class="stat-num">98%</div><div class="stat-label">Accuracy</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: FORM ═══ -->
+  <div id="page-form" class="hidden fade-in">
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-label" id="step-label">Step 1 of 4 — Academic Marks</span>
+        <span class="progress-pct" id="step-pct">25%</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:25%"></div></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step-1" class="section-card">
+      <div class="section-title"><div class="s-icon">📊</div>Academic Marks</div>
+      <div class="section-sub">Enter your percentage scores (0–100). Be honest for accurate results.</div>
+      <div class="form-grid">
+        <div class="score-bar"><label>Mathematics <span class="val" id="v-math">75</span></label><input type="range" min="0" max="100" value="75" id="s-math" oninput="updateSlider('math',this.value)"><div class="track-bg"><div class="track-fill" id="t-math" style="width:75%"></div></div></div>
+        <div class="score-bar"><label>English / Communication <span class="val" id="v-eng">70</span></label><input type="range" min="0" max="100" value="70" id="s-eng" oninput="updateSlider('eng',this.value)"><div class="track-bg"><div class="track-fill" id="t-eng" style="width:70%"></div></div></div>
+        <div class="score-bar"><label>Science / Physics <span class="val" id="v-sci">65</span></label><input type="range" min="0" max="100" value="65" id="s-sci" oninput="updateSlider('sci',this.value)"><div class="track-bg"><div class="track-fill" id="t-sci" style="width:65%"></div></div></div>
+        <div class="score-bar"><label>Computer Science / IT <span class="val" id="v-cs">60</span></label><input type="range" min="0" max="100" value="60" id="s-cs" oninput="updateSlider('cs',this.value)"><div class="track-bg"><div class="track-fill" id="t-cs" style="width:60%"></div></div></div>
+        <div class="score-bar"><label>Business / Economics <span class="val" id="v-biz">55</span></label><input type="range" min="0" max="100" value="55" id="s-biz" oninput="updateSlider('biz',this.value)"><div class="track-bg"><div class="track-fill" id="t-biz" style="width:55%"></div></div></div>
+        <div class="score-bar"><label>Arts / Design <span class="val" id="v-art">50</span></label><input type="range" min="0" max="100" value="50" id="s-art" oninput="updateSlider('art',this.value)"><div class="track-bg"><div class="track-fill" id="t-art" style="width:50%"></div></div></div>
+      </div>
+      <button class="btn-primary" onclick="goStep(2)">Continue to Interests →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step-2" class="section-card hidden">
+      <div class="section-title"><div class="s-icon">💡</div>Your Interests</div>
+      <div class="section-sub">Select everything that genuinely interests you.</div>
+      <div class="chip-group" id="interests-group">
+        <div class="chip" data-val="coding" onclick="toggleChip(this)">💻 Coding & Programming</div>
+        <div class="chip" data-val="data" onclick="toggleChip(this)">📊 Data & Analytics</div>
+        <div class="chip" data-val="design" onclick="toggleChip(this)">🎨 UI/UX Design</div>
+        <div class="chip" data-val="business" onclick="toggleChip(this)">💼 Business & Entrepreneurship</div>
+        <div class="chip" data-val="finance" onclick="toggleChip(this)">💰 Finance & Investment</div>
+        <div class="chip" data-val="medicine" onclick="toggleChip(this)">🏥 Medicine & Healthcare</div>
+        <div class="chip" data-val="science" onclick="toggleChip(this)">🔬 Research & Science</div>
+        <div class="chip" data-val="art" onclick="toggleChip(this)">🎨 Creative Arts</div>
+        <div class="chip" data-val="engineering" onclick="toggleChip(this)">⚙️ Engineering</div>
+        <div class="chip" data-val="marketing" onclick="toggleChip(this)">📣 Marketing & Branding</div>
+        <div class="chip" data-val="writing" onclick="toggleChip(this)">✍️ Writing & Journalism</div>
+        <div class="chip" data-val="social" onclick="toggleChip(this)">🤝 Social Work</div>
+        <div class="chip" data-val="gaming" onclick="toggleChip(this)">🎮 Gaming & AR/VR</div>
+        <div class="chip" data-val="cybersecurity" onclick="toggleChip(this)">🔐 Cybersecurity</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(1)">← Back</button>
+        <button class="btn-primary" style="flex:1" onclick="goStep(3)">Continue to Personality →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step-3" class="section-card hidden">
+      <div class="section-title"><div class="s-icon">🧠</div>Your Personality</div>
+      <div class="section-sub">Which best describes how you naturally work?</div>
+      <div class="personality-grid" id="personality-group">
+        <div class="p-card" data-val="introvert" onclick="selectPersonality(this)"><div class="p-icon">🤫</div><div class="p-title">Deep Thinker (Introvert)</div><div class="p-desc">Prefer solo work, deep focus, reading, structured environments</div></div>
+        <div class="p-card" data-val="extrovert" onclick="selectPersonality(this)"><div class="p-icon">🗣️</div><div class="p-title">People Person (Extrovert)</div><div class="p-desc">Thrive in teams, love communicating, leading, networking</div></div>
+        <div class="p-card" data-val="creative" onclick="selectPersonality(this)"><div class="p-icon">🎭</div><div class="p-title">Creative Soul</div><div class="p-desc">Think outside the box, love design, storytelling, ideas</div></div>
+        <div class="p-card" data-val="analytical" onclick="selectPersonality(this)"><div class="p-icon">🔍</div><div class="p-title">Problem Solver (Analytical)</div><div class="p-desc">Love logic, patterns, systems, and finding optimal solutions</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(2)">← Back</button>
+        <button class="btn-primary" style="flex:1" onclick="goStep(4)">Continue to Goals →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="step-4" class="section-card hidden">
+      <div class="section-title"><div class="s-icon">🎯</div>Future Goals</div>
+      <div class="section-sub">What matters most to you in your career?</div>
+      <div class="goal-grid" id="goals-group">
+        <div class="goal-card" data-val="salary" onclick="toggleGoal(this)"><div class="g-icon">💸</div><div class="g-label">High Salary</div></div>
+        <div class="goal-card" data-val="impact" onclick="toggleGoal(this)"><div class="g-icon">🌍</div><div class="g-label">Social Impact</div></div>
+        <div class="goal-card" data-val="startup" onclick="toggleGoal(this)"><div class="g-icon">🚀</div><div class="g-label">Start Own Business</div></div>
+        <div class="goal-card" data-val="stability" onclick="toggleGoal(this)"><div class="g-icon">🏛️</div><div class="g-label">Job Stability</div></div>
+        <div class="goal-card" data-val="remote" onclick="toggleGoal(this)"><div class="g-icon">🌐</div><div class="g-label">Remote Work</div></div>
+        <div class="goal-card" data-val="prestige" onclick="toggleGoal(this)"><div class="g-icon">🏆</div><div class="g-label">Prestige</div></div>
+        <div class="goal-card" data-val="learning" onclick="toggleGoal(this)"><div class="g-icon">📖</div><div class="g-label">Continuous Learning</div></div>
+        <div class="goal-card" data-val="creative_freedom" onclick="toggleGoal(this)"><div class="g-icon">🎨</div><div class="g-label">Creative Freedom</div></div>
+        <div class="goal-card" data-val="leadership" onclick="toggleGoal(this)"><div class="g-icon">👑</div><div class="g-label">Leadership</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(3)">← Back</button>
+        <button class="btn-primary" style="flex:1" id="analyze-btn" onclick="analyzeCareer()">🔍 Analyze My Career Path</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: RESULT ═══ -->
+  <div id="page-result" class="hidden fade-in">
+    <div class="result-hero">
+      <div class="result-badge">✅ Analysis Complete — Backend Decision Tree</div>
+      <div id="res-emoji" style="font-size:52px;margin-bottom:12px">💻</div>
+      <div id="res-title" class="career-title-big">Software Engineering</div>
+      <div id="res-desc" class="career-desc">Your profile aligns strongly with this career.</div>
+      <div class="badges-row">
+        <span class="salary-badge" id="res-salary">💰 $95,000 – $180,000</span>
+        <span class="growth-badge" id="res-growth">📈 Very High Growth</span>
+      </div>
+      <div class="match-pill">🎯 <span id="res-confidence">90%</span> Confidence Match</div>
+    </div>
+
+    <div class="result-grid">
+      <div class="r-card">
+        <div class="r-card-header"><div class="r-card-icon ri-purple">🌳</div><div class="r-card-title">Decision Tree Path</div></div>
+        <div id="res-tree" class="tree-viz"></div>
+      </div>
+      <div class="r-card">
+        <div class="r-card-header"><div class="r-card-icon ri-teal">⚡</div><div class="r-card-title">Core Skills to Build</div></div>
+        <div id="res-skills" class="skill-tags"></div>
+      </div>
+      <div class="r-card">
+        <div class="r-card-header"><div class="r-card-icon ri-gold">📚</div><div class="r-card-title">Recommended Courses</div></div>
+        <div id="res-courses" class="course-list"></div>
+      </div>
+      <div class="r-card">
+        <div class="r-card-header"><div class="r-card-icon ri-sky">🗺️</div><div class="r-card-title">Career Roadmap</div></div>
+        <div id="res-roadmap" class="roadmap"></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Your Strength Profile</div>
+        <div style="position:relative;height:250px"><canvas id="radar-chart" role="img" aria-label="Radar chart of academic strengths">Strength radar chart.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Career Match Distribution</div>
+        <div style="position:relative;height:250px"><canvas id="donut-chart" role="img" aria-label="Doughnut chart showing career matches">Career match chart.</canvas></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><div class="s-icon">🔮</div>Also Consider</div>
+      <div class="section-sub">Other strong paths based on your profile</div>
+      <div id="res-alts" class="alt-grid"></div>
+    </div>
+
+    <div class="feedback-section">
+      <div class="feedback-title">Was this recommendation helpful?</div>
+      <div class="feedback-sub">Your feedback is saved to the database and helps improve the model</div>
+      <div class="fb-btns">
+        <button class="fb-btn yes" onclick="submitFeedback(true)">👍 Yes, spot on!</button>
+        <button class="fb-btn no" onclick="submitFeedback(false)">👎 Not quite</button>
+      </div>
+      <div id="fb-thanks" class="fb-thanks hidden">✅ Feedback saved to database. Thank you!</div>
+    </div>
+
+    <div class="restart-wrap">
+      <button class="btn-restart" onclick="restart()">↺ Start New Analysis</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CONFIG — change port if your Flask runs elsewhere
+// ═══════════════════════════════════════════════════════════
+const API_BASE = 'http://localhost:5000';
+
+// ─── State ────────────────────────────────────────────────
+const state = {
+  marks:       {math:75,eng:70,sci:65,cs:60,biz:55,art:50},
+  interests:   [],
+  personality: null,
+  goals:       [],
+  predictionId: null,
+};
+
+// ─── Career emoji map (for alternatives display) ──────────
+const CAREER_EMOJIS = {
+  software:'💻', datascience:'📊', uiux:'🎨',
+  business:'💼', medicine:'🏥', finance:'💰'
+};
+
+// ═══════════════════════════════════════════════════════════
+//  API HEALTH CHECK
+// ═══════════════════════════════════════════════════════════
+async function checkAPI() {
+  const el   = document.getElementById('api-status');
+  const text = document.getElementById('api-status-text');
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, {signal: AbortSignal.timeout(3000)});
+    if (res.ok) {
+      el.className   = 'api-status ok';
+      text.textContent = '✓ Backend Connected';
+    } else {
+      throw new Error('bad status');
+    }
+  } catch {
+    el.className   = 'api-status err';
+    text.textContent = '✗ Backend Offline';
+  }
+}
+checkAPI();
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showPage(page) {
+  ['home','form','result'].forEach(p =>
+    document.getElementById('page-' + p).classList.add('hidden')
+  );
+  document.getElementById('page-' + page).classList.remove('hidden');
+}
+
+function goStep(n) {
+  [1,2,3,4].forEach(i =>
+    document.getElementById('step-' + i).classList.add('hidden')
+  );
+  document.getElementById('step-' + n).classList.remove('hidden');
+
+  const pct    = [25,50,75,100];
+  const labels = [
+    'Step 1 of 4 — Academic Marks',
+    'Step 2 of 4 — Interests',
+    'Step 3 of 4 — Personality',
+    'Step 4 of 4 — Future Goals',
+  ];
+  document.getElementById('prog-fill').style.width = pct[n-1] + '%';
+  document.getElementById('step-pct').textContent   = pct[n-1] + '%';
+  document.getElementById('step-label').textContent  = labels[n-1];
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FORM CONTROLS
+// ═══════════════════════════════════════════════════════════
+function updateSlider(key, val) {
+  state.marks[key] = +val;
+  document.getElementById('v-' + key).textContent      = val;
+  document.getElementById('t-' + key).style.width      = val + '%';
+}
+
+function toggleChip(el) {
+  const val = el.dataset.val;
+  el.classList.toggle('selected');
+  const idx = state.interests.indexOf(val);
+  if (idx > -1) state.interests.splice(idx, 1);
+  else           state.interests.push(val);
+}
+
+function selectPersonality(el) {
+  document.querySelectorAll('.p-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.personality = el.dataset.val;
+}
+
+function toggleGoal(el) {
+  const val = el.dataset.val;
+  el.classList.toggle('selected');
+  const idx = state.goals.indexOf(val);
+  if (idx > -1) state.goals.splice(idx, 1);
+  else           state.goals.push(val);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN: CALL FLASK API → /api/predict
+// ═══════════════════════════════════════════════════════════
+async function analyzeCareer() {
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.remove('hidden');
+
+  // Build payload matching Flask API schema
+  const payload = {
+    marks:       state.marks,
+    interests:   state.interests,
+    personality: state.personality || 'analytical',
+    goals:       state.goals,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}/api/predict`, {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify(payload),
+    });
+
+    const json = await response.json();
+
+    if (!response.ok || !json.success) {
+      throw new Error(json.errors?.join(', ') || json.error || 'Prediction failed');
+    }
+
+    const data = json.data;
+    state.predictionId = data.prediction_id;
+
+    document.getElementById('loading').classList.add('hidden');
+    btn.disabled = false;
+
+    renderResults(data);
+    showPage('result');
+
+  } catch (err) {
+    document.getElementById('loading').classList.add('hidden');
+    btn.disabled = false;
+    showToast('API Error', err.message + '. Is Flask running? (python app.py)');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ═══════════════════════════════════════════════════════════
+function renderResults(data) {
+  // Hero section
+  document.getElementById('res-emoji').textContent       = data.emoji || '🎯';
+  document.getElementById('res-title').textContent       = data.title;
+  document.getElementById('res-desc').textContent        = data.description;
+  document.getElementById('res-confidence').textContent  = data.confidence + '%';
+  document.getElementById('res-salary').textContent      = '💰 ' + (data.avg_salary || 'N/A');
+  document.getElementById('res-growth').textContent      = '📈 ' + (data.growth || 'High');
+
+  renderTree(data.decision_path || []);
+  renderSkills(data.skills || []);
+  renderCourses(data.courses || []);
+  renderRoadmap(data.roadmap || []);
+  renderCharts(data);
+  renderAlts(data.alternatives || []);
+}
+
+function renderTree(path) {
+  const el = document.getElementById('res-tree');
+  const conditions = path.filter(p => p.direction !== 'LEAF').slice(0, 4);
+  const leaf       = path.find(p => p.direction === 'LEAF');
+
+  let html = `
+    <div class="tree-level"><span class="tree-node tn-root">🌳 Student Profile</span></div>
+    <div class="tree-arrow">↓</div>
+    <div class="tree-level">
+      ${conditions.map(c => `<span class="tree-node tn-branch">${c.rule.substring(0,35)}</span>`).join('')}
+    </div>
+    <div class="tree-arrow">↓</div>
+    <div class="tree-level"><span class="tree-node tn-leaf">✅ ${leaf ? leaf.rule.replace('→ Recommend: ','') : 'Result'}</span></div>
+    <div class="tree-rules">
+      ${path.map(p => `<div class="tree-rule ${p.direction==='LEAF'?'leaf':''}">
+        <strong>[${p.direction}]</strong> ${p.rule}
+      </div>`).join('')}
+    </div>`;
+  el.innerHTML = html;
+}
+
+function renderSkills(skills) {
+  const colors = ['st-purple','st-teal','st-gold'];
+  document.getElementById('res-skills').innerHTML =
+    skills.map((s, i) => `<span class="skill-tag ${colors[i % 3]}">${s}</span>`).join('');
+}
+
+function renderCourses(courses) {
+  document.getElementById('res-courses').innerHTML =
+    courses.map((c, i) => `
+      <div class="course-item">
+        <div class="c-num">${i+1}</div>
+        <div><div class="c-name">${c.name}</div><div class="c-platform">${c.platform}</div></div>
+      </div>`).join('');
+}
+
+function renderRoadmap(roadmap) {
+  document.getElementById('res-roadmap').innerHTML =
+    roadmap.map((r, i) => `
+      <div class="rm-item">
+        <div class="rm-left">
+          <div class="rm-dot ${i===0?'active':'future'}"></div>
+          ${i < roadmap.length-1 ? '<div class="rm-line"></div>' : ''}
+        </div>
+        <div>
+          <div class="rm-phase">${r.phase}</div>
+          <div class="rm-title">${r.title}</div>
+          <div class="rm-desc">${r.desc}</div>
+        </div>
+      </div>`).join('');
+}
+
+function renderCharts(data) {
+  // Destroy old charts if they exist
+  ['radar-chart','donut-chart'].forEach(id => {
+    const existing = Chart.getChart(id);
+    if (existing) existing.destroy();
+  });
+
+  const m = state.marks;
+
+  // Radar chart — academic profile
+  new Chart(document.getElementById('radar-chart'), {
+    type: 'radar',
+    data: {
+      labels: ['Math','English','Science','CS','Business','Arts'],
+      datasets: [{
+        label:            'Your Scores',
+        data:             [m.math, m.eng, m.sci, m.cs, m.biz, m.art],
+        backgroundColor:  'rgba(124,106,255,0.2)',
+        borderColor:      '#a78bfa',
+        pointBackgroundColor: '#a78bfa',
+        borderWidth: 2,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend:{display:false}},
+      scales: {
+        r: {
+          min:0, max:100,
+          grid:        {color:'rgba(255,255,255,0.06)'},
+          angleLines:  {color:'rgba(255,255,255,0.06)'},
+          pointLabels: {color:'#a9a9c8', font:{size:11}},
+          ticks:       {color:'#6b6b88', font:{size:9}, stepSize:25, backdropColor:'transparent'},
+        }
+      }
+    }
+  });
+
+  // Donut — career match distribution
+  const allScores = (data.all_scores || []).slice(0, 4);
+  new Chart(document.getElementById('donut-chart'), {
+    type: 'doughnut',
+    data: {
+      labels:   allScores.map(s => s.career.charAt(0).toUpperCase() + s.career.slice(1)),
+      datasets: [{
+        data:            allScores.map(s => s.score),
+        backgroundColor: ['rgba(124,106,255,0.75)','rgba(20,184,166,0.7)','rgba(245,158,11,0.7)','rgba(56,189,248,0.55)'],
+        borderColor:     ['#7c6aff','#14b8a6','#f59e0b','#38bdf8'],
+        borderWidth: 2,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '64%',
+      plugins: {
+        legend: {
+          display:  true,
+          position: 'bottom',
+          labels:   {color:'#a9a9c8', font:{size:11}, padding:12, boxWidth:10, usePointStyle:true},
+        }
+      }
+    }
+  });
+}
+
+function renderAlts(alts) {
+  document.getElementById('res-alts').innerHTML =
+    alts.slice(0,3).map(a => `
+      <div class="alt-card">
+        <div class="alt-icon">${CAREER_EMOJIS[a.career] || '⭐'}</div>
+        <div class="alt-title">${a.career.charAt(0).toUpperCase() + a.career.slice(1)}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">Strong alternative match</div>
+        <div class="alt-match">${a.confidence.toFixed(1)}% confidence</div>
+      </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FEEDBACK → POST /api/feedback
+// ═══════════════════════════════════════════════════════════
+async function submitFeedback(positive) {
+  document.querySelectorAll('.fb-btn').forEach(b => b.disabled = true);
+  try {
+    await fetch(`${API_BASE}/api/feedback`, {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify({
+        prediction_id: state.predictionId,
+        rating:        positive ? 'positive' : 'negative',
+      }),
+    });
+  } catch {}
+  document.getElementById('fb-thanks').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RESTART
+// ═══════════════════════════════════════════════════════════
+function restart() {
+  state.interests   = [];
+  state.personality = null;
+  state.goals       = [];
+  state.predictionId= null;
+  state.marks       = {math:75,eng:70,sci:65,cs:60,biz:55,art:50};
+
+  ['math','eng','sci','cs','biz','art'].forEach(k => {
+    document.getElementById('s-' + k).value       = state.marks[k];
+    document.getElementById('v-' + k).textContent  = state.marks[k];
+    document.getElementById('t-' + k).style.width  = state.marks[k] + '%';
+  });
+  document.querySelectorAll('.chip').forEach(c      => c.classList.remove('selected'));
+  document.querySelectorAll('.p-card').forEach(c    => c.classList.remove('selected'));
+  document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('fb-thanks').classList.add('hidden');
+  document.querySelectorAll('.fb-btn').forEach(b => b.disabled = false);
+
+  goStep(1);
+  showPage('home');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ERROR TOAST
+// ═══════════════════════════════════════════════════════════
+function showToast(title, msg) {
+  const old = document.getElementById('toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'toast';
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-title">⚠️ ${title}</div><div class="toast-msg">${msg}</div>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+</script>
+</body>
+</html>
